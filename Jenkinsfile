@@ -1,20 +1,19 @@
-node {
-    // Ambil environment variable dari Jenkins yang sudah disetel
-    withEnv([
-        "DOCKER_HOST=tcp://docker:2376",
-        "DOCKER_CERT_PATH=/certs/client",
-        "DOCKER_TLS_VERIFY=1"
-    ]) {
-        stage('Checkout') {
-            checkout scm
+pipeline {
+    agent {
+        docker {
+            image 'node:16-buster-slim'
+            args '-p 3000:3000'
+            reuseNode true
         }
+    }
+    stages {
         stage('Build') {
-            docker.image('node:16-buster-slim').inside('-p 3000:3000') {
+            steps {
                 sh 'npm install'
             }
         }
         stage('Test') {
-            docker.image('node:16-buster-slim').inside('-p 3000:3000') {
+            steps {
                 sh './jenkins/scripts/test.sh'
             }
         }
